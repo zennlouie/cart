@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { CartItemRow } from '../components/CartItemRow';
 import { CartSummary } from '../components/CartSummary';
@@ -23,9 +23,34 @@ export function ShopScreen() {
     removeFromCart,
     setVoucherCode,
   } = useCart();
+  const [addedProductName, setAddedProductName] = useState('');
+
+  useEffect(() => {
+    if (!addedProductName) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setAddedProductName('');
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [addedProductName]);
+
+  const handleAddToCart = (product: (typeof PRODUCTS)[number]) => {
+    addToCart(product);
+    setAddedProductName(product.productName);
+  };
 
   return (
     <View className="flex-1 bg-surface-950">
+      {addedProductName ? (
+        <View className="absolute left-5 right-5 top-5 z-10 rounded-2xl border border-emerald-300/30 bg-emerald-500/90 px-4 py-3">
+          <Text className="text-sm font-bold text-surface-950">
+            {addedProductName} added to cart
+          </Text>
+        </View>
+      ) : null}
       <ScrollView>
         <View className="p-5">
           <View className="m-3 rounded-3xl border border-white/10 bg-surface-900">
@@ -54,7 +79,7 @@ export function ShopScreen() {
             {PRODUCTS.map(product => (
               <ProductCard
                 key={product.id}
-                onAddToCart={addToCart}
+                onAddToCart={handleAddToCart}
                 product={product}
               />
             ))}
